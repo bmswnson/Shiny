@@ -9,7 +9,8 @@ mudcatsRaw <- read.csv("https://raw.githubusercontent.com/bmswnson/Mudcats/main/
 #Creating full names
 mudcatsRaw$fullName <- paste(mudcatsRaw$First, mudcatsRaw$Last, sep = " ")
 
-
+mudcatsGraph <- mudcatsRaw %>% 
+  filter(Last != "Totals")
 
 #Mudcats App
 
@@ -103,7 +104,7 @@ server <- function(input, output) {
   
   
     
-    ggplot(data = mudcatsRaw, aes(x=fullName, y= !!as.symbol(input$graph), label = Last)) + #the !! as.symbol is necessary for inputs to be read correctly
+    ggplot(data = mudcatsGraph, aes(x=fullName, y= !!as.symbol(input$graph), label = Last)) + #the !! as.symbol is necessary for inputs to be read correctly
       scale_x_discrete(guide = guide_axis(angle = 90)) +
       geom_point(alpha=0.3) +
       geom_point(data=highlight_df, 
