@@ -3,24 +3,31 @@
 install.packages("rvest")
 library("rvest")
 
-scrape_url <- "https://gc.com/t/summer-2022/arrowhead-west-mudcats-moorhead-628eaa8d0e8fb8a65f000001/stats"
+#rvest example
+starwars <- "https://rvest.tidyverse.org/articles/starwars.html"
 
-gamechanger <- read_html(scrape_url)
-
-
-stats <- gamechanger %>% html_elements("th class")
+starwars <- read_html(scrape_url)
 
 
-test <- readLines(flat_html, encoding = "")
-
-View(flat_html)
-
-??grep
+stats <- starwars %>% 
+  html_elements("section")
 
 
-grep(".statCell", flat_html)
+title <- stats %>% 
+  html_element("h2") %>% 
+  html_text2()
 
 
+#Gamechanger
+gc <- "https://gc.com/t/summer-2022/arrowhead-west-mudcats-moorhead-628eaa8d0e8fb8a65f000001/stats"
 
-starwars <- read_html("https://rvest.tidyverse.org/articles/starwars.html")
+gcElements <- read_html(gc)
 
+
+stats <- gcElements %>% 
+  html_elements("tbody")
+
+
+title <- gcElements %>% 
+  html_element("tbody") %>% 
+  html_table()
