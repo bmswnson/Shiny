@@ -1,0 +1,13 @@
+name: Mudcats
+title: Mudcats
+username:
+account: swanson
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 8605632
+bundleId: 6976803
+url: https://swanson.shinyapps.io/Mudcats/
+when: 1679174414.80223
+lastSyncTime: 1679174414.80224
+asMultiple: FALSE
+asStatic: FALSE

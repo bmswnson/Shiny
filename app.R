@@ -1,4 +1,3 @@
-# install.packages("shiny")
 
 library(shiny)
 library(tidyverse)
@@ -7,74 +6,77 @@ library(tidyverse)
 # Reading Data
 mudcatsRaw <- read.csv("https://raw.githubusercontent.com/bmswnson/Mudcats/main/Data/currentStats.csv")
 
-# View(mudcatsRaw)
-
 #Creating full names
-mudcatsRaw$fullName <- paste(mudcatsRaw$First, mudcatsRaw$Last, sep = "_")
-
-mudcatsAverage <- mudcatsRaw %>% 
-  select(fullName, AVG)
-
-#removing names down
-Gabe <- mudcatsRaw[1,]
-Howe <- mudcatsRaw[1,]
-
-playerAverage <- list(Gabe, Howe)
+mudcatsRaw$fullName <- paste(mudcatsRaw$First, mudcatsRaw$Last, sep = " ")
 
 
-#Example App
+
+#Mudcats App
 
 # Define UI for miles per gallon app ----
-ui <- pageWithSidebar(
+ui <- fluidPage(
   
   # App title ----
-  headerPanel("Miles Per Gallon"),
+  headerPanel("Mudcat Stats"), #Name of app
   
   # Sidebar panel for inputs ----
-  sidebarPanel(
+  sidebarLayout(
     
-    # Input: Selector for variable to plot against mpg ----
-    selectInput("variable", "Variable:", 
-                c("Cylinders" = "cyl",
-                  "Transmission" = "am",
-                  "Gears" = "gear")),
+   
     
-    # Input: Checkbox for whether outliers should be included ----
-    checkboxInput("outliers", "Show outliers", TRUE)
+    sidebarPanel(width = 3,
+    #
     
-  ),
-  
-  # Main panel for displaying outputs ----
+    h6("Select players to compare", align = "left"),
+   
+     selectizeInput("variable", "Player", 
+                choices = mudcatsRaw$fullName, multiple = TRUE),
+    
+    h6("Select stats to see", align = "left"),
+    
+    selectizeInput("stat", "Stats", 
+                  choices = names(mudcatsRaw), multiple = TRUE), 
+    
+    h6("Select stat to visualize", align = "left"),
+   
+    selectInput("graph", "Graph Stats", 
+                   choices = names(mudcatsRaw))
+    ),
+           
+
   # Main panel for displaying outputs ----
   mainPanel(
     
     # Output: Formatted text for caption ----
     h3(textOutput("caption")),
     
-    # Output: Plot of the requested variable against mpg ----
-    plotOutput("mpgPlot")
+    # Output: Table of all the outputs
+    tableOutput("average"),
+    
+    #Plot output
+    plotOutput("plot", 
+               height = 600,
+               click = "plot_click"), 
+    
+
     
   )
 )
+)
 
-
-
-
-# Data pre-processing ----
-# Tweak the "am" variable to have nicer factor labels -- since this
-# doesn't rely on any user inputs, we can do this once at startup
-# and then use the value throughout the lifetime of the app
-mpgData <- mtcars
-mpgData$am <- factor(mpgData$am, labels = c("Automatic", "Manual"))
 
 # Define server logic to plot various variables against mpg ----
 server <- function(input, output) {
+  
+  
+  #update select input
+  
   
   # Compute the formula text ----
   # This is in a reactive expression since it is shared by the
   # output$caption and output$mpgPlot functions
   formulaText <- reactive({
-    paste("mpg ~", input$variable)
+    paste(input$variable)
   })
   
   # Return the formula text for printing as a caption ----
@@ -82,21 +84,47 @@ server <- function(input, output) {
     formulaText()
   })
   
-  # Generate a plot of the requested variable against mpg ----
-  # and only exclude outliers if requested
-  output$mpgPlot <- renderPlot({
-    boxplot(as.formula(formulaText()),
-            data = mpgData,
-            outline = input$outliers,
-            col = "#007bc2", pch = 19)
+  # Generate a table of requested values
+  output$average <- renderTable({
+
+    mudcatsRaw %>% 
+      filter(fullName %in% input$variable) %>% 
+      select(fullName, input$stat)
+    # mudcatsRaw[which(mudcatsRaw$fullName == input$variable), c("AVG")]
+    
   })
+  
+  #creating a plot to also go in the app
+  output$plot <- renderPlot({
+    
+    #This dataframe allows to emphasize those that are selected as an input
+    highlight_df <- mudcatsRaw %>% 
+      filter(fullName %in% input$variable)
+  
+  
+    
+    ggplot(data = mudcatsRaw, aes(x=fullName, y= !!as.symbol(input$graph), label = Last)) + #the !! as.symbol is necessary for inputs to be read correctly
+      scale_x_discrete(guide = guide_axis(angle = 90)) +
+      geom_point(alpha=0.3) +
+      geom_point(data=highlight_df, 
+                 aes(x = fullName, y = !!as.symbol(input$graph)), 
+                 color='red',
+                 size=3) + 
+      geom_text(data=highlight_df,
+                aes(fullName, !!as.symbol(input$graph), label=fullName), 
+                size = 5, vjust = -2)
+    
+    
+    
+    #creating a table of the plot click graph
+  
+  }
+  )
   
 }
 
 
 
 shinyApp(ui, server)
-
-
 
 

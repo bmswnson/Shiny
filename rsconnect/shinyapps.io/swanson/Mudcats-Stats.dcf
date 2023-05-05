@@ -1,0 +1,14 @@
+name: Mudcats-Stats
+title: Mudcats-Stats
+username:
+account: swanson
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 8605668
+bundleId: 6985172
+url: https://swanson.shinyapps.io/Mudcats-Stats/
+when: 1679367961.62866
+lastSyncTime: 1679367961.62867
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: example_app.R|plotWorkspace.R|README.md
